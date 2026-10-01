@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ModeMap - Room bass modes</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#1a1423; color:#f1eaf7; line-height:1.5; }
+  .wrap { max-width:680px; margin:0 auto; padding:26px 18px 60px; }
+  a { color:#ff8fd0; } h1 { font-size:28px; } h1 span { color:#ff8fd0; } .sub { color:#b9a8c9; margin:4px 0 18px; }
+  .card { background:#2a2037; border-radius:14px; padding:16px; margin-bottom:14px; }
+  label { display:block; font-size:13px; color:#b9a8c9; margin:10px 0 4px; }
+  input, select { width:100%; padding:11px; border-radius:9px; border:1px solid #473659; background:#1a1423; color:#f1eaf7; font-size:16px; }
+  .row { display:flex; gap:10px; } .row > div { flex:1; }
+  .big { font-size:36px; font-weight:800; color:#ff8fd0; } .lbl { font-size:13px; color:#b9a8c9; }
+  .grid { display:flex; gap:14px; flex-wrap:wrap; } .grid > div { flex:1; min-width:150px; }
+  .note { font-size:14px; color:#d6c8e3; margin-top:10px; } h2 { font-size:17px; margin-bottom:8px; }
+  .warn { background:#4a2230; border:1px solid #c8486e; color:#ffd3df; padding:12px; border-radius:10px; margin-top:12px; font-size:14px; }
+  .strip { position:relative; height:120px; background:#1a1423; border-radius:10px; margin-top:8px; overflow:hidden; }
+  .bar { position:absolute; bottom:0; width:3px; border-radius:2px 2px 0 0; } .axial { background:#ff8fd0; height:100px; } .tangential { background:#8f9bff; height:62px; } .oblique { background:#6fd8c0; height:34px; }
+  .axis { display:flex; justify-content:space-between; font-size:12px; color:#b9a8c9; margin-top:4px; }
+  .legend { font-size:13px; color:#b9a8c9; margin-top:8px; } .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin:0 4px 0 10px; vertical-align:middle; }
+  table { width:100%; border-collapse:collapse; font-size:14px; } td, th { padding:6px 4px; border-bottom:1px solid #3b2d4b; text-align:left; } th { color:#b9a8c9; font-weight:600; }
+  .small { font-size:13px; color:#b9a8c9; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mode<span>Map</span></h1>
+  <div class="sub">Every room has bass notes it loves too much. Enter the room size to see where they are.</div>
+  <div class="card">
+    <div class="row"><div><label for="L">Length</label><input id="L" type="number" min="1" step="0.1" value="5"></div><div><label for="W">Width</label><input id="W" type="number" min="1" step="0.1" value="4"></div><div><label for="H">Height</label><input id="H" type="number" min="1" step="0.1" value="3"></div><div style="max-width:84px"><label for="u">Unit</label><select id="u"><option value="m">m</option><option value="ft">ft</option></select></div></div>
+    <div class="row"><div><label for="T">Air temperature (&deg;C)</label><input id="T" type="number" step="1" value="20"></div><div><label for="rt">Reverb time RT60 (s, optional)</label><input id="rt" type="number" min="0.1" step="0.05" value="0.5"></div><div><label for="fm">Show up to</label><select id="fm"><option value="150">150 Hz</option><option value="200" selected>200 Hz</option><option value="300">300 Hz</option></select></div></div>
+  </div>
+  <div class="card" id="sum"></div>
+  <div class="card"><h2>Modes by frequency</h2><div class="strip" id="strip"></div><div class="axis" id="axis"></div><div class="legend"><i style="background:#ff8fd0"></i>axial (strongest)<i style="background:#8f9bff"></i>tangential<i style="background:#6fd8c0"></i>oblique</div></div>
+  <div class="card"><h2>Axial modes</h2><table id="tbl"></table></div>
+  <div class="card"><h2>About this</h2><div class="small" style="margin-top:0">Natural frequencies of an empty rectangular room with rigid walls: f = (c/2) &times; sqrt((p/L)&sup2; + (q/W)&sup2; + (r/H)&sup2;). Real rooms with furniture, soft walls and openings shift these and damp them. Close axial pairs (within 5%) are flagged as a rough heuristic. The Schroeder frequency is 2000 &times; sqrt(RT60 / volume in m&sup3;). Speed of sound uses 331.3 + 0.606 &times; &deg;C. Treat this as a planning map, not a measurement. Sources: <a href="https://en.wikipedia.org/wiki/Schroeder_frequency">Schroeder frequency</a>, <a href="http://www.vibrationdata.com/tutorials_alt/aco_rec.pdf">Vibrationdata, rectangular room modes</a>, <a href="https://odeon.dk/pdf/A29-JASA-EL-021601_1_Rindel.pdf">Rindel, room proportions</a>. <a href="index.html">About</a></div></div>
+</div>
+<script src="engine.js"></script>
+<script>
+var $ = function (i) { return document.getElementById(i); };
+function render() {
+  var u = $('u').value, L = Modes.toM(parseFloat($('L').value), u), W = Modes.toM(parseFloat($('W').value), u), H = Modes.toM(parseFloat($('H').value), u), t = parseFloat($('T').value), rt = parseFloat($('rt').value), fm = parseFloat($('fm').value);
+  if (!(L > 0 && W > 0 && H > 0) || isNaN(t)) { $('sum').innerHTML = '<div class="lbl">Enter length, width, height and temperature.</div>'; $('strip').innerHTML = ''; $('tbl').innerHTML = ''; $('axis').innerHTML = ''; return; }
+  var c = Modes.soundMs(t), ms = Modes.modes(L, W, H, c, fm), V = L * W * H, h = '';
+  var f1 = ms.length ? ms[0].f : null;
+  h += '<div class="grid"><div><div class="lbl">Lowest mode</div><div class="big" id="f1">' + (f1 ? f1.toFixed(1) + ' Hz' : 'none') + '</div></div><div><div class="lbl">Volume</div><div class="big" id="vol">' + V.toFixed(0) + ' m&sup3;</div></div>';
+  if (rt > 0) { var fs = Modes.schroeder(rt, V); h += '<div><div class="lbl">Schroeder frequency</div><div class="big" id="fs">' + fs.toFixed(0) + ' Hz</div></div>'; }
+  h += '</div>';
+  if (rt > 0) h += '<div class="note">Below the Schroeder frequency the room rings at individual modes. Above it they blend together.</div>';
+  var st = Modes.stacked(L, W, H, c, fm, 0.05);
+  if (st.length) h += '<div class="warn" id="stack">Stacked axial modes: ' + st.map(function (p) { return p[0].f.toFixed(1) + ' and ' + p[1].f.toFixed(1) + ' Hz'; }).join('; ') + '. Two close modes add up and can make the bass boomy at those notes.</div>';
+  var cube = ms.filter(function (m) { return m.count > 1 && m.kind === 'axial'; });
+  if (cube.length) h += '<div class="warn" id="degen">Two or more dimensions are equal, so ' + cube[0].count + ' axial modes land on the same ' + cube[0].f.toFixed(1) + ' Hz. Cube-like rooms have the worst bass.</div>';
+  $('sum').innerHTML = h;
+  var s = '', lo = 20, span = fm - lo;
+  ms.forEach(function (m) { if (m.f < lo) return; s += '<div class="bar ' + m.kind + '" title="' + m.f.toFixed(1) + ' Hz ' + m.kind + '" style="left:' + ((m.f - lo) / span * 100).toFixed(2) + '%"></div>'; });
+  $('strip').innerHTML = s; $('axis').innerHTML = '<span>20 Hz</span><span>' + Math.round((lo + fm) / 2) + ' Hz</span><span>' + fm + ' Hz</span>';
+  var ax = ms.filter(function (m) { return m.kind === 'axial'; }), tb = '<tr><th>Hz</th><th>Along</th><th>Order</th></tr>';
+  ax.slice(0, 12).forEach(function (m) { var d = m.p ? 'length' : m.q ? 'width' : 'height', o = m.p || m.q || m.r; tb += '<tr><td>' + m.f.toFixed(1) + '</td><td>' + d + (m.count > 1 ? ' (x' + m.count + ')' : '') + '</td><td>' + o + '</td></tr>'; });
+  $('tbl').innerHTML = tb;
+}
+['L', 'W', 'H', 'u', 'T', 'rt', 'fm'].forEach(function (i) { $(i).oninput = render; $(i).onchange = render; });
+render();
+</script>
+</body>
+</html>
