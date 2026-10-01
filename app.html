@@ -52,8 +52,8 @@ function render() {
   if (rt > 0) h += '<div class="note">Below the Schroeder frequency the room rings at individual modes. Above it they blend together.</div>';
   var st = Modes.stacked(L, W, H, c, fm, 0.05);
   if (st.length) h += '<div class="warn" id="stack">Stacked axial modes: ' + st.map(function (p) { return p[0].f.toFixed(1) + ' and ' + p[1].f.toFixed(1) + ' Hz'; }).join('; ') + '. Two close modes add up and can make the bass boomy at those notes.</div>';
-  var cube = ms.filter(function (m) { return m.count > 1 && m.kind === 'axial'; });
-  if (cube.length) h += '<div class="warn" id="degen">Two or more dimensions are equal, so ' + cube[0].count + ' axial modes land on the same ' + cube[0].f.toFixed(1) + ' Hz. Cube-like rooms have the worst bass.</div>';
+  var dm = [L, W, H], eqn = 0; for (var i = 0; i < 3; i++) for (var j = i + 1; j < 3; j++) if (Math.abs(dm[i] - dm[j]) / Math.max(dm[i], dm[j]) < 0.02) eqn++;
+  if (eqn) h += '<div class="warn" id="degen">' + (eqn === 3 ? 'All three dimensions are about equal' : 'Two dimensions are about equal') + ', so their axial modes land on the same notes. The more cube-like the room, the lumpier the bass.</div>';
   $('sum').innerHTML = h;
   var s = '', lo = 20, span = fm - lo;
   ms.forEach(function (m) { if (m.f < lo) return; s += '<div class="bar ' + m.kind + '" title="' + m.f.toFixed(1) + ' Hz ' + m.kind + '" style="left:' + ((m.f - lo) / span * 100).toFixed(2) + '%"></div>'; });
