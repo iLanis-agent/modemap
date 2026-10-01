@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ModeMap - Room bass modes</title>
+<meta name="description" content="Enter your room size and see its bass resonances: axial, tangential and oblique modes, stacked notes, and the Schroeder frequency. Runs in your browser.">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#1a1423; color:#f1eaf7; line-height:1.6; }
+  .wrap { max-width:690px; margin:0 auto; padding:48px 20px 60px; }
+  .logo { font-size:46px; font-weight:800; } .logo span { color:#ff8fd0; }
+  .tag { font-size:19px; margin-top:10px; color:#d6c8e3; }
+  .cta { display:inline-block; margin-top:26px; background:#ff8fd0; color:#1a1423; font-weight:700; padding:14px 30px; border-radius:12px; text-decoration:none; }
+  h2 { font-size:21px; margin:40px 0 10px; } p, li { color:#bfaed0; margin-bottom:8px; } ul { margin-left:20px; }
+  .demo { margin-top:26px; background:#2a2037; border-radius:14px; padding:18px; display:flex; gap:18px; flex-wrap:wrap; }
+  .demo div { flex:1; min-width:140px; } .demo b { display:block; font-size:30px; color:#ff8fd0; }
+  footer { margin-top:50px; font-size:13px; color:#8f7fa1; } a { color:#ff8fd0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Mode<span>Map</span></div>
+  <div class="tag">A 5 m room rings at 34 Hz whether you like it or not. ModeMap shows where your room boosts the bass, so you can move the speakers, the seat or the bass trap before buying anything.</div>
+  <a class="cta" href="app.html">Map my room &rarr;</a>
+  <div class="demo"><div><b>34.3 Hz</b>lowest mode of a 5 m long room</div><div><b>183 Hz</b>Schroeder frequency, 5x4x3 m at 0.5 s</div><div><b>3 in 1</b>modes stack up in a cubic room</div></div>
+  <h2>What you get</h2>
+  <ul>
+    <li>Every axial, tangential and oblique mode up to 150, 200 or 300 Hz on one frequency strip</li>
+    <li>A list of the axial modes, with the dimension each one belongs to</li>
+    <li>Warnings for stacked modes and for equal dimensions</li>
+    <li>The Schroeder frequency from your reverb time; metres or feet, temperature-corrected</li>
+  </ul>
+  <footer>Planning aid for an empty rectangular room, not a measurement. Sources: <a href="http://www.vibrationdata.com/tutorials_alt/aco_rec.pdf">Vibrationdata</a>, <a href="https://en.wikipedia.org/wiki/Schroeder_frequency">Schroeder frequency</a><br>App Factory project. <a href="https://github.com/iLanis-agent/modemap">Code</a></footer>
+</div>
+</body>
+</html>
